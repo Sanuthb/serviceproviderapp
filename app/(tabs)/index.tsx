@@ -8,12 +8,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-// Local images
-import Cleaning from "../../assets/images/cleaning.png";
-import Painting from "../../assets/images/paint.png";
-import Repairing from "../../assets/images/repairing.png";
-import Laundry from "../../assets/images/washing.png";
+import {RootState} from "../../redux/Store"
+import { useSelector } from "react-redux";
 
 const services = [
   {
@@ -35,23 +31,26 @@ const services = [
 
 // Category definitions with icons
 const categories = [
-  { name: "Cleaning", icon: Cleaning },
-  { name: "Painting", icon: Painting },
-  { name: "Repairing", icon: Repairing },
-  { name: "Laundry", icon: Laundry },
+  { name: "Cleaning",image:require("../../assets/images/cleaning.png") },
+  { name: "Painting", image:require("../../assets/images/paint.png") },
+  { name: "Repairing",image:require("../../assets/images/repairing.png") },
+  { name: "Laundry",image:require("../../assets/images/washing.png") },
 ];
 
+
 export default function HomeScreen() {
+  const user = useSelector((state: RootState) => state.user);
+  console.log(user)
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.hello}>Hello Maria,</Text>
+        <Text style={styles.hello}>Hello {user.displayName || 'Maria'},</Text>
           <Text style={styles.title}>Which service do you need?</Text>
         </View>
         <Image
-          source={{ uri: "https://i.pravatar.cc/100?img=8" }}
+          source={{ uri: "https://img.freepik.com/free-vector/smiling-young-man-glasses_1308-174702.jpg?t=st=1746075909~exp=1746079509~hmac=3f4250496487c8b6785b64288738ba8f96f35a56017dc9936fe1d2fe553b01e2&w=740" }}
           style={styles.avatar}
         />
       </View>
@@ -71,7 +70,7 @@ export default function HomeScreen() {
           <View key={index} style={styles.categoryItem}>
             <View style={styles.categoryIcon}>
               <Image
-                source={cat.icon}
+                source={cat.image}
                 style={{ width: 30, height: 30 }}
                 resizeMode="contain"
               />
