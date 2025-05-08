@@ -1,51 +1,79 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-
-// Dummy booked services data (ideally fetched from backend or context)
-const bookings = [
-  {
-    id: "1",
-    title: "Home Cleaning",
-    provider: "Hema Watson",
-    image: "https://images.pexels.com/photos/4239034/pexels-photo-4239034.jpeg",
-    time: "April 30, 2025 - 10:00 AM",
-    status: "Confirmed",
-  },
-  {
-    id: "2",
-    title: "Gardening",
-    provider: "Saloni Sam",
-    image: "https://images.pexels.com/photos/450326/pexels-photo-450326.jpeg",
-    time: "May 2, 2025 - 3:00 PM",
-    status: "Pending",
-  },
-];
+import { getDocs, collection } from "firebase/firestore";
+import { db } from "../../firebase"; // Assuming this file contains the Firebase setup
 
 export default function Bookings() {
+  const [bookings, setBookings] = useState<any[]>([]);
+
+  // Fetch bookings from Firestore
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "orders"));
+        const bookingData: any[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          
+          // Safely convert Firestore Timestamp to JavaScript Date
+          const datetime = data.datetime ? data.datetime.toDate() : null; 
+          const createdAt = data.createdAt ? data.createdAt.toDate() : null;
+          
+          bookingData.push({
+            id: doc.id,
+            ...data,
+            datetime: datetime,
+            createdAt: createdAt,
+          });
+        });
+        setBookings(bookingData); // Set the state with the fetched bookings
+      } catch (error) {
+        console.error("Error fetching bookings: ", error);
+      }
+    };
+
+    fetchBookings();
+  });
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Bookings 📅</Text>
       <FlatList
         data={bookings}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <View style={styles.details}>
-              <Text style={styles.serviceTitle}>{item.title}</Text>
-              <Text style={styles.provider}>by {item.provider}</Text>
-              <Text style={styles.time}>{item.time}</Text>
-              <Text
-                style={[
-                  styles.status,
-                  { color: item.status === "Confirmed" ? "green" : "orange" },
-                ]}
-              >
-                {item.status}
-              </Text>
+        renderItem={({ item }) => {
+          // Safely handle case when datetime is null or undefined
+          const formattedDate = item.datetime
+            ? item.datetime.toLocaleDateString() // Format if it's a valid Date object
+            : "No Date Available";
+          const formattedTime = item.datetime
+            ? item.datetime.toLocaleTimeString() // Format if it's a valid Date object
+            : "No Time Available";
+
+          return (
+            <View style={styles.card}>
+              <Image source={{ uri: item.image }} style={styles.image} />
+              <View style={styles.details}>
+                <Text style={styles.serviceTitle}>{item.service}</Text>
+                <Text style={styles.provider}>by {item.provider}</Text>
+                <Text style={styles.provider}>Price: ₹{item.price}/Hour</Text>
+                <Text style={styles.provider}>Message: {item.message}</Text>
+                <Text style={styles.provider}>Contact: {item.contact}</Text>
+                <Text style={styles.time}>
+                  Date: {formattedDate} | Time: {formattedTime}
+                </Text>
+                <Text
+                  style={[
+                    styles.status,
+                    { color: item.status === "Confirmed" ? "green" : "orange" },
+                  ]}
+                >
+                  {item.status}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
     </View>
   );

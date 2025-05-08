@@ -8,51 +8,42 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {RootState} from "../../redux/Store"
+import { RootState } from "../../redux/Store";
 import { useSelector } from "react-redux";
-
-const services = [
-  {
-    title: "Home Cleaning",
-    rating: 4.5,
-    price: "$24/Hour",
-    discount: "25% OFF",
-    provider: "Hema Watson",
-    image: "https://images.pexels.com/photos/4239034/pexels-photo-4239034.jpeg",
-  },
-  {
-    title: "Gardening",
-    rating: 3.5,
-    price: "$18/Hour",
-    provider: "Saloni Sam",
-    image: "https://images.pexels.com/photos/450326/pexels-photo-450326.jpeg",
-  },
-];
+import Services from "../component/Services";
+import { useRouter } from "expo-router";
 
 // Category definitions with icons
 const categories = [
-  { name: "Cleaning",image:require("../../assets/images/cleaning.png") },
-  { name: "Painting", image:require("../../assets/images/paint.png") },
-  { name: "Repairing",image:require("../../assets/images/repairing.png") },
-  { name: "Laundry",image:require("../../assets/images/washing.png") },
+  { name: "Cleaning", image: require("../../assets/images/cleaning.png") },
+  { name: "Painting", image: require("../../assets/images/paint.png") },
+  { name: "Repairing", image: require("../../assets/images/repairing.png") },
+  { name: "Laundry", image: require("../../assets/images/washing.png") },
 ];
-
 
 export default function HomeScreen() {
   const user = useSelector((state: RootState) => state.user);
-  console.log(user)
+  const router = useRouter();
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View>
-        <Text style={styles.hello}>Hello {user.displayName || 'Maria'},</Text>
+          <Text style={styles.hello}>Hello {user.displayName || "Maria"},</Text>
           <Text style={styles.title}>Which service do you need?</Text>
         </View>
-        <Image
-          source={{ uri: "https://img.freepik.com/free-vector/smiling-young-man-glasses_1308-174702.jpg?t=st=1746075909~exp=1746079509~hmac=3f4250496487c8b6785b64288738ba8f96f35a56017dc9936fe1d2fe553b01e2&w=740" }}
-          style={styles.avatar}
-        />
+        <TouchableOpacity
+          onPress={() => {
+            router.replace("/userprofile");
+          }}
+        >
+          <Image
+            source={{
+              uri: "https://img.freepik.com/free-vector/smiling-young-man-glasses_1308-174702.jpg?t=st=1746075909~exp=1746079509~hmac=3f4250496487c8b6785b64288738ba8f96f35a56017dc9936fe1d2fe553b01e2&w=740",
+            }}
+            style={styles.avatar}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Search Bar */}
@@ -60,7 +51,12 @@ export default function HomeScreen() {
         <Ionicons name="search" size={20} color="gray" />
         <TextInput placeholder="How can I help you?" style={styles.input} />
         <TouchableOpacity>
-          <Ionicons name="mic" size={24} color="#4e8ef7" style={styles.micIcon} />
+          <Ionicons
+            name="mic"
+            size={24}
+            color="#4e8ef7"
+            style={styles.micIcon}
+          />
         </TouchableOpacity>
       </View>
 
@@ -82,30 +78,56 @@ export default function HomeScreen() {
 
       {/* Popular Services */}
       <Text style={styles.popularTitle}>Popular Services ✨</Text>
-
-      {services.map((item, index) => (
-        <View key={index} style={styles.card}>
-          <Image source={{ uri: item.image }} style={styles.cardImage} />
-          <View style={styles.cardContent}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.rating}>⭐ {item.rating}</Text>
-              {item.discount && (
-                <View style={styles.discountTag}>
-                  <Text style={styles.discountText}>{item.discount}</Text>
-                </View>
-              )}
-            </View>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.provider}>by {item.provider}</Text>
-            <View style={styles.cardFooter}>
-              <Text style={styles.price}>{item.price}</Text>
-              <TouchableOpacity style={styles.bookButton}>
-                <Text style={styles.bookText}>BOOK SERVICE</Text>
-              </TouchableOpacity>
-            </View>
+      <Services limit={3} />
+      <View style={{ position: "relative" }}>
+        <Image
+          source={require("../../assets/images/paintingbanner.jpg")}
+          style={{ width: "100%", height: 200, borderRadius: 20 }}
+          resizeMode="cover"
+        />
+        <View
+          style={{
+            position: "absolute",
+            backgroundColor: "rgba(0,0,0,0.1)",
+            width: "100%",
+            height: "100%",
+            borderRadius: 20,
+            flex: 1,
+            justifyContent: "center",
+            paddingLeft: 10,
+            gap: 10,
+          }}
+        >
+          <View>
+            <Text style={{ fontSize: 25, color: "white", fontWeight: "bold" }}>
+              Wall Painting
+            </Text>
+            <Text style={{ fontSize: 25, color: "white", fontWeight: "bold" }}>
+              Service
+            </Text>
           </View>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "white",
+              borderRadius: 10,
+              paddingHorizontal: 4,
+              paddingVertical: 4,
+              alignSelf: "flex-start",
+              width: 60,
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{ fontSize: 10, fontWeight: "bold" }}
+              onPress={() => {
+                router.replace("/services");
+              }}
+            >
+              View
+            </Text>
+          </TouchableOpacity>
         </View>
-      ))}
+      </View>
     </ScrollView>
   );
 }
@@ -155,47 +177,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   categoryText: { fontSize: 12, color: "#333" },
-  popularTitle: { fontWeight: "bold", fontSize: 16, marginBottom: 10 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    marginBottom: 20,
-    flexDirection: "row",
-    padding: 10,
-    shadowColor: "#ccc",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  cardImage: { width: 80, height: 80, borderRadius: 12 },
-  cardContent: { flex: 1, marginLeft: 10 },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  rating: { fontWeight: "bold", color: "#333" },
-  discountTag: {
-    backgroundColor: "#e0f0ff",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  discountText: { fontSize: 10, color: "#4e8ef7" },
-  cardTitle: { fontSize: 14, fontWeight: "bold", marginTop: 5 },
-  provider: { fontSize: 12, color: "#666" },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  price: { fontWeight: "bold", color: "#4e8ef7" },
-  bookButton: {
-    backgroundColor: "#0d47a1",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  bookText: { color: "#fff", fontSize: 12 },
+  popularTitle: { fontWeight: "bold", fontSize: 20, marginBottom: 10 },
 });

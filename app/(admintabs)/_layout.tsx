@@ -11,7 +11,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "home-sharp" : "home-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}
@@ -23,7 +23,7 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "construct" : "construct-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}
@@ -35,7 +35,19 @@ export default function AdminLayout() {
             <Ionicons
               name={focused ? "construct" : "construct-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
+            />
+          ),
+        }}
+      />
+       <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "person" : "person-outline"}
+              size={24}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}

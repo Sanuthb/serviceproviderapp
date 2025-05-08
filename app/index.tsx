@@ -4,14 +4,12 @@ import { useRouter } from 'expo-router'
 import {BounceIn,FadeInDown} from "react-native-reanimated"
 import Animated from "react-native-reanimated"
 
-
 const Splash = () => {
   const router = useRouter()
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace('/login')  // Navigate to login screen
-      // router.replace('/(admintabs)')  // Navigate to login screen
     }, 3000)
 
     return () => clearTimeout(timer)

@@ -17,36 +17,48 @@ import Animated, {
 } from "react-native-reanimated";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { setUser } from "../redux/Slice/userSlice";
+import { RootState } from "../redux/Store";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user);
 
   const handleLogin = async () => {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
-  
+
       // Dispatch the setUser action with user details
-      dispatch(setUser({
-        email: user.email, // Can be string or null
-        displayName: user.displayName || null, // Can be string or null
-      }));
-  
+      dispatch(
+        setUser({
+          email: user.email, // Can be string or null
+          displayName: user.displayName || null, // Can be string or null
+        })
+      );
+
       // Redirect to the home screen
-      router.replace('/(admintabs)');
+      if (user.displayName == "admin") {
+        router.replace("/(admintabs)");
+      }else{
+        router.replace("/(tabs)");
+      }
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Invalid credentials. Try again.');
+      console.error("Login error:", error);
+      alert("Invalid credentials. Try again.");
     }
   };
   const handleRegister = () => {
-    router.replace('/register');
+    router.replace("/register");
   };
   return (
     <KeyboardAvoidingView
@@ -97,7 +109,10 @@ const Login = () => {
           </TouchableOpacity>
         </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(1000)} style={styles.registerContainer}>
+        <Animated.View
+          entering={FadeIn.delay(1000)}
+          style={styles.registerContainer}
+        >
           <Text style={styles.registerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={handleRegister}>
             <Text style={styles.registerLink}>Register</Text>
@@ -109,7 +124,6 @@ const Login = () => {
 };
 
 export default Login;
-
 
 const styles = StyleSheet.create({
   container: {

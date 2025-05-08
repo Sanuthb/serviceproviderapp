@@ -11,7 +11,7 @@ export default function TabsLayout() {
             <Ionicons
               name={focused ? "home-sharp" : "home-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}
@@ -23,7 +23,7 @@ export default function TabsLayout() {
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}
@@ -35,7 +35,7 @@ export default function TabsLayout() {
             <Ionicons
               name={focused ? "construct" : "construct-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}
@@ -47,7 +47,7 @@ export default function TabsLayout() {
             <Ionicons
               name={focused ? "call" : "call-outline"}
               size={24}
-              color={color}
+              color={focused?"#FFD63A":""}
             />
           ),
         }}

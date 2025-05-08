@@ -13,7 +13,9 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="detailedview" options={{ headerShown: true, headerTitle:"" }} />
+        <Stack.Screen name="userprofile" options={{ headerShown: false, headerTitle:"" }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(admintabs)" options={{ headerShown: false }} />
       </Stack>
       </Provider>
