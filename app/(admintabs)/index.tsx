@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Image, ActivityIndicator, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { updateOrderStatus } from '../../db/placeorders';
 
@@ -14,6 +14,9 @@ type Order = {
   contact: string;
   address: string;
   status: "Pending" | "Confirmed" | "Completed" | "Canceled";
+  username:string
+  userId:string
+
 };
 
 const AdminBookings = () => {
@@ -21,17 +24,44 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
-    const querySnapshot = await getDocs(collection(db, 'orders'));
-    const ordersData: Order[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      ordersData.push({
-        id: doc.id,
-        ...data,
-      } as Order);
-    });
-    setOrders(ordersData);
-    setLoading(false);
+    try {
+      const querySnapshot = await getDocs(collection(db, 'orders'));
+      const ordersData: Order[] = [];
+
+      for (const docSnap of querySnapshot.docs) {
+        const data = docSnap.data();
+        let username = "Unknown";
+        
+        try {
+          const userDoc = await getDoc(doc(db, 'users', data.userId));
+          if (userDoc.exists()) {
+            username = userDoc.data().name || "Unnamed";
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch user data for ${data.userId}`, err);
+        }
+
+        ordersData.push({
+          id: docSnap.id,
+          service: data.service,
+          provider:data.provider,
+          username,
+          datetime: data.datetime,
+          message: data.message,
+          contact: data.contact,
+          address: data.address,
+          status: data.status,
+          userId:data.userId
+        });
+      }
+
+      setOrders(ordersData);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      Alert.alert("Error", "Failed to fetch orders.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStatusChange = async (id: string, newStatus: Order['status']) => {
@@ -62,7 +92,10 @@ const AdminBookings = () => {
       renderItem={({ item }) => (
         <View style={styles.card}>
           <View style={styles.details}>
-            <Text>Provider: {item.provider}</Text>
+            <Text style={{fontWeight:"bold",fontSize:20}}>Service: {item.service}</Text>
+            <Text>Service Provider: {item.provider}</Text>
+            <Text style={{fontWeight:"bold",fontSize:15}}>User details</Text>
+            <Text>Name: {item.username}</Text>
             <Text>Contact: {item.contact}</Text>
             <Text>Address: {item.address}</Text>
             <Text>Message: {item.message}</Text>

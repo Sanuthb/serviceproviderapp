@@ -41,11 +41,23 @@ export default function AdminLayout() {
         }}
       />
        <Tabs.Screen
-        name="profile"
+        name="users"
         options={{
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "person" : "person-outline"}
+              size={24}
+              color={focused?"#FFD63A":""}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "settings" : "settings-outline"}
               size={24}
               color={focused?"#FFD63A":""}
             />

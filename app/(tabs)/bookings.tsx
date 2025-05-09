@@ -1,32 +1,36 @@
+// Bookings.tsx
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-import { getDocs, collection } from "firebase/firestore";
-import { db } from "../../firebase"; // Assuming this file contains the Firebase setup
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
+import { getAuth } from "firebase/auth";
 
 export default function Bookings() {
   const [bookings, setBookings] = useState<any[]>([]);
 
-  // Fetch bookings from Firestore
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "orders"));
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const bookingsRef = collection(db, "orders");
+        const userQuery = query(bookingsRef, where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(userQuery);
+
         const bookingData: any[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          
-          // Safely convert Firestore Timestamp to JavaScript Date
-          const datetime = data.datetime ? data.datetime.toDate() : null; 
-          const createdAt = data.createdAt ? data.createdAt.toDate() : null;
-          
           bookingData.push({
             id: doc.id,
             ...data,
-            datetime: datetime,
-            createdAt: createdAt,
+            datetime: data.datetime?.toDate(),
+            createdAt: data.createdAt?.toDate(),
           });
         });
-        setBookings(bookingData); // Set the state with the fetched bookings
+
+        setBookings(bookingData);
       } catch (error) {
         console.error("Error fetching bookings: ", error);
       }
@@ -42,12 +46,11 @@ export default function Bookings() {
         data={bookings}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          // Safely handle case when datetime is null or undefined
           const formattedDate = item.datetime
-            ? item.datetime.toLocaleDateString() // Format if it's a valid Date object
+            ? item.datetime.toLocaleDateString()
             : "No Date Available";
           const formattedTime = item.datetime
-            ? item.datetime.toLocaleTimeString() // Format if it's a valid Date object
+            ? item.datetime.toLocaleTimeString()
             : "No Time Available";
 
           return (

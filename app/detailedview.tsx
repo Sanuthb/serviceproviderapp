@@ -1,28 +1,39 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TextInput, Button, ScrollView } from "react-native";
+// DetailedView.tsx
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  Button,
+  ScrollView,
+} from "react-native";
 import React, { useState } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebase";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { getAuth } from "firebase/auth";
+import { useLocalSearchParams } from "expo-router";
 
 const DetailedView = () => {
   const { service } = useLocalSearchParams();
   const parsedService = JSON.parse(service as string);
-  const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   const [message, setMessage] = useState("");
-  const [contact, setContact] = useState("");  // Contact details
-  const [address, setAddress] = useState("");  // Address details
+  const [contact, setContact] = useState("");
+  const [address, setAddress] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleDateChange = (_event: any, date?: Date) => {
     setShowDatePicker(false);
     if (date) {
       setSelectedDate(date);
-      setShowTimePicker(true); // show time after date selected
+      setShowTimePicker(true);
     }
   };
 
@@ -36,7 +47,7 @@ const DetailedView = () => {
       alert("Please fill in all details (Date, Time, Contact, Address)");
       return;
     }
-  
+
     const dateTime = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
@@ -44,8 +55,16 @@ const DetailedView = () => {
       selectedTime.getHours(),
       selectedTime.getMinutes()
     );
-  
+
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("Please log in to book a service.");
+        return;
+      }
+
       const docRef = await addDoc(collection(db, "orders"), {
         service: parsedService.title,
         provider: parsedService.provider,
@@ -59,8 +78,10 @@ const DetailedView = () => {
         datetime: dateTime,
         createdAt: new Date(),
         status: "Pending",
+        userId: user.uid,
       });
-      console.log("Document written with ID: ", docRef.id);  // This logs the generated ID
+
+      console.log("Document written with ID: ", docRef.id);
       alert("Booking successful!");
       setModalVisible(false);
     } catch (error) {
@@ -71,76 +92,48 @@ const DetailedView = () => {
   return (
     <ScrollView style={styles.container}>
       <Image source={{ uri: parsedService.image }} style={styles.image} />
-      
       <View style={styles.content}>
         <Text style={styles.title}>{parsedService.title}</Text>
         <Text style={styles.provider}>by {parsedService.provider}</Text>
-
         <View style={styles.row}>
           <Text style={styles.rating}>⭐ {parsedService.rating}</Text>
           {parsedService.discount && (
             <Text style={styles.discount}>{parsedService.discount}% OFF</Text>
           )}
         </View>
-
         <Text style={styles.price}>₹{parsedService.price}/Hour</Text>
-
         <Text style={styles.description}>
           Enjoy professional {parsedService.title.toLowerCase()} services at your doorstep.
           High-quality and trusted service providers for all your needs.
         </Text>
-
         <TouchableOpacity style={styles.bookButton} onPress={() => setModalVisible(true)}>
           <Text style={styles.bookButtonText}>Book Slot</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Modal for date, time, and message */}
+      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Book {parsedService.title}</Text>
-
             <Button title="Pick Date and Time" color="#0d47a1" onPress={() => setShowDatePicker(true)} />
             {showDatePicker && (
               <DateTimePicker
                 mode="date"
                 value={selectedDate || new Date()}
                 onChange={handleDateChange}
-                display="default"
               />
             )}
-
             {showTimePicker && (
               <DateTimePicker
                 mode="time"
                 value={selectedTime || new Date()}
                 onChange={handleTimeChange}
-                display="default"
               />
             )}
-
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your message"
-              value={message}
-              onChangeText={setMessage}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your contact details"
-              value={contact}
-              onChangeText={setContact}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your address"
-              value={address}
-              onChangeText={setAddress}
-            />
-
+            <TextInput style={styles.input} placeholder="Enter your message" value={message} onChangeText={setMessage} />
+            <TextInput style={styles.input} placeholder="Enter your contact details" value={contact} onChangeText={setContact} />
+            <TextInput style={styles.input} placeholder="Enter your address" value={address} onChangeText={setAddress} />
             <View style={styles.buttonGroup}>
               <Button title="Confirm Booking" color="#0d47a1" onPress={handleBooking} />
               <Button title="Cancel" color="gray" onPress={() => setModalVisible(false)} />

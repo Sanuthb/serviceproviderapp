@@ -17,6 +17,8 @@ import {
   } from "react-native-reanimated";
   import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
   import {auth} from "../firebase"
+  import { doc,setDoc } from 'firebase/firestore';
+  import {db} from "../firebase"
   
   const Register = () => {
     const router = useRouter();
@@ -29,13 +31,18 @@ import {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
       
-          // Optional: Set display name
+          // Set Firebase Auth displayName
           await updateProfile(user, {
             displayName: name,
           });
       
-          console.log("User registered:", user.email);
-          router.replace("/(tabs)");
+          // Store user in Firestore
+          await setDoc(doc(db, "users", user.uid), {
+            name: name,
+            email: email,
+          });
+      
+          router.replace("/login");
         } catch (error) {
           console.error("Registration Error:", error);
           // Optionally show error to user here
